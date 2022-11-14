@@ -50,8 +50,11 @@ gem 'bootsnap', require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
-# A RuboCop extension focused on enforcing Rails best practices and coding conventions
+# A RuboCop extension focused on enforcing Rails best practices and coding conventions [https://github.com/rubocop/rubocop-rails]
 gem 'rubocop-rails', require: false
+
+# Provides Rails integration for the Rodauth authentication framework [https://github.com/janko/rodauth-rails]
+gem 'rodauth-rails', '~> 1.6'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -75,3 +78,4 @@ group :test do
   gem 'selenium-webdriver'
   gem 'webdrivers'
 end
+
