@@ -11,6 +11,19 @@ class RodauthMain < Rodauth::Rails::Auth
     # See the Rodauth documentation for the list of available config options:
     # http://rodauth.jeremyevans.net/documentation.html
 
+    before_create_account do
+      # Validate presence of the name field
+      throw_error_status(422, 'name', 'must be present') unless param_or_nil('name')
+    end
+    after_create_account do
+      # Create the associated profile record with name
+      Profile.create!(account_id:, name: param('name'))
+    end
+    after_close_account do
+      # Delete the associated profile record
+      Profile.find_by!(account_id:).destroy
+    end
+
     # ==> General
     # The secret key used for hashing public-facing tokens for various features.
     # Defaults to Rails `secret_key_base`, but you can use your own secret key.
