@@ -4,7 +4,7 @@ class RodauthMain < Rodauth::Rails::Auth
   configure do
     # List of authentication features that are loaded.
     enable :create_account, :verify_account, :verify_account_grace_period,
-           :login, :logout, :remember,
+           :login, :logout, :remember, :email_auth,
            :reset_password, :change_password, :change_password_notify,
            :change_login, :verify_login_change, :close_account
 
@@ -32,7 +32,7 @@ class RodauthMain < Rodauth::Rails::Auth
     verify_account_set_password? false
 
     # Redirect back to originally requested location after authentication.
-    # login_return_to_requested_location? true
+    login_return_to_requested_location? true
     # two_factor_auth_return_to_requested_location? true # if using MFA
 
     # Autologin the user after they have reset their password.
@@ -76,7 +76,7 @@ class RodauthMain < Rodauth::Rails::Auth
 
     # Override default flash messages.
     # create_account_notice_flash "Your account has been created. Please verify your account by visiting the confirmation link sent to your email address."
-    # require_login_error_flash "Login is required for accessing this page"
+    require_login_error_flash 'Login is required for accessing this page'
     # login_notice_flash nil
 
     # ==> Validation
@@ -101,6 +101,20 @@ class RodauthMain < Rodauth::Rails::Auth
 
     # ==> Hooks
     # Validate custom fields in the create account form.
+
+    before_create_account do
+      # Validate presence of the name field
+      throw_error_status(422, 'name', 'must be present') unless param_or_nil('name')
+    end
+    after_create_account do
+      # Create the associated profile record with name
+      Profile.create!(account_id:, name: param('name'))
+    end
+    after_close_account do
+      # Delete the associated profile record
+      Profile.find_by!(account_id:).destroy
+    end
+
     # before_create_account do
     #   throw_error_status(422, "name", "must be present") if param("name").empty?
     # end
@@ -134,5 +148,10 @@ class RodauthMain < Rodauth::Rails::Auth
     # reset_password_deadline_interval Hash[hours: 6]
     # verify_login_change_deadline_interval Hash[days: 2]
     # remember_deadline_interval Hash[days: 30]
+
+    login_label 'Email'
+
+    create_account_route 'register'
+    prefix '/user'
   end
 end
