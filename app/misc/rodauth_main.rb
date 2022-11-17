@@ -149,5 +149,8 @@ class RodauthMain < Rodauth::Rails::Auth
     # remember_deadline_interval Hash[days: 30]
 
     login_label 'Email'
+
+    create_account_route 'register'
+    prefix '/user'
   end
 end
