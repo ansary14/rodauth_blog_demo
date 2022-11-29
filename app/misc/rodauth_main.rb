@@ -4,7 +4,7 @@ class RodauthMain < Rodauth::Rails::Auth
   configure do
     # List of authentication features that are loaded.
     enable :create_account, :verify_account, :verify_account_grace_period,
-           :login, :logout, :remember, :email_auth,
+           :login, :logout, :remember, :email_auth, :otp,
            :reset_password, :change_password, :change_password_notify,
            :change_login, :verify_login_change, :close_account
 
@@ -78,6 +78,11 @@ class RodauthMain < Rodauth::Rails::Auth
     # create_account_notice_flash "Your account has been created. Please verify your account by visiting the confirmation link sent to your email address."
     require_login_error_flash 'Login is required for accessing this page'
     # login_notice_flash nil
+
+    # don't show error message when redirected after login
+    two_factor_need_authentication_error_flash { flash[:notice] == login_notice_flash ? nil : super() }
+    # show generic authentication message
+    two_factor_auth_notice_flash { login_notice_flash }
 
     # ==> Validation
     # Override default validation error messages.
