@@ -4,7 +4,7 @@ class RodauthMain < Rodauth::Rails::Auth
   configure do
     # List of authentication features that are loaded.
     enable :create_account, :verify_account, :verify_account_grace_period,
-           :login, :logout, :remember, :email_auth, :otp,
+           :login, :logout, :remember, :email_auth, :otp, :recovery_codes,
            :reset_password, :change_password, :change_password_notify,
            :change_login, :verify_login_change, :close_account
 
@@ -118,6 +118,16 @@ class RodauthMain < Rodauth::Rails::Auth
     after_close_account do
       # Delete the associated profile record
       Profile.find_by!(account_id:).destroy
+    end
+
+    # automatically generate recovery codes after enabling first MFA method
+    auto_add_recovery_codes? true
+    # automatically remove recovery codes after disabling last MFA method
+    auto_remove_recovery_codes? true
+    # display recovery codes after TOTP setup
+    after_otp_setup do
+      set_notice_now_flash "#{otp_setup_notice_flash}, please make note of your recovery codes"
+      return_response add_recovery_codes_view
     end
 
     # before_create_account do
